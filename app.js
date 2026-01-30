@@ -57,54 +57,55 @@ const App = {
   },
 
   // Inject styles for dropdown menu
-  _ensureMenuStyles(){
-    if (document.getElementById('appMenuStyles')) return;
-    const css = `
-      #appMenu {
-        position: absolute;
-        min-width: 160px;
-        background: #fff;
-        border: 1px solid rgba(0,0,0,0.08);
-        box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-        border-radius: 8px;
-        overflow: hidden;
-        z-index: 9999;
-        transform-origin: top right;
-        transition: opacity .15s ease, transform .15s ease;
-        opacity: 0;
-        pointer-events: none;
-        direction: rtl;
-      }
-      #appMenu.show {
-        opacity: 1;
-        transform: translateY(6px) scale(1);
-        pointer-events: auto;
-      }
-      #appMenu .menu-item {
-        padding: 10px 12px;
-        cursor: pointer;
-        font-size: 14px;
-        color: #111827;
-      }
-      #appMenu .menu-item:hover {
-        background: #f3f4f6;
-      }
-      #appMenu .menu-divider {
-        height: 1px;
-        background: #e5e7eb;
-        margin: 4px 0;
-      }
-      /* أساسيات لعرض صفحة الملف الشخصي */
-      .profile-card .field { display:flex; flex-direction:column; gap:6px; margin-bottom:12px; }
-      .profile-card .field label { font-size:13px; color:#374151; }
-      .profile-card .field input, .profile-card .field textarea { padding:8px 10px; border:1px solid #e5e7eb; border-radius:6px; font-size:14px; }
-      .profile-actions { display:flex; gap:8px; margin-top:8px; }
-    `;
-    const s = document.createElement('style');
-    s.id = 'appMenuStyles';
-    s.appendChild(document.createTextNode(css));
-    document.head.appendChild(s);
-  },
+  // (استبدال) Inject styles for dropdown menu
+_ensureMenuStyles(){
+  if (document.getElementById('appMenuStyles')) return;
+  const css = `
+    #appMenu {
+      position: fixed; /* fixed so it doesn't affect page layout / width */
+      min-width: 160px;
+      background: #fff;
+      border: 1px solid rgba(0,0,0,0.08);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+      border-radius: 8px;
+      overflow: hidden;
+      z-index: 9999;
+      transform-origin: top right;
+      transition: opacity .15s ease, transform .15s ease;
+      opacity: 0;
+      pointer-events: none;
+      direction: rtl;
+    }
+    #appMenu.show {
+      opacity: 1;
+      transform: translateY(6px) scale(1);
+      pointer-events: auto;
+    }
+    #appMenu .menu-item {
+      padding: 10px 12px;
+      cursor: pointer;
+      font-size: 14px;
+      color: #111827;
+    }
+    #appMenu .menu-item:hover {
+      background: #f3f4f6;
+    }
+    #appMenu .menu-divider {
+      height: 1px;
+      background: #e5e7eb;
+      margin: 4px 0;
+    }
+    /* أساسيات لعرض صفحة الملف الشخصي */
+    .profile-card .field { display:flex; flex-direction:column; gap:6px; margin-bottom:12px; }
+    .profile-card .field label { font-size:13px; color:#374151; }
+    .profile-card .field input, .profile-card .field textarea { padding:8px 10px; border:1px solid #e5e7eb; border-radius:6px; font-size:14px; }
+    .profile-actions { display:flex; gap:8px; margin-top:8px; }
+  `;
+  const s = document.createElement('style');
+  s.id = 'appMenuStyles';
+  s.appendChild(document.createTextNode(css));
+  document.head.appendChild(s);
+},
 
   // Create the dropdown element and global handlers (lazy)
   createMenu(){
