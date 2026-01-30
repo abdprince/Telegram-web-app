@@ -63,7 +63,7 @@ _ensureMenuStyles(){
   const css = `
     #appMenu {
       position: fixed; /* fixed so it doesn't affect page layout / width */
-      min-width: 160px;
+      min-width: 300px;
       background: #fff;
       border: 1px solid rgba(0,0,0,0.08);
       box-shadow: 0 6px 18px rgba(0,0,0,0.08);
