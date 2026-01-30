@@ -18,35 +18,44 @@ const App = {
       {id:2, title:'عنصر ٢', desc:'وصف عنصر ثاني'}
     ];
 
-    // بيانات الملف الشخصي (افتراضية — يمكن تحميلها من API لاحقاً)
-    this.profile = {
-      name: 'اسم المستخدم',
-      email: 'user@example.com',
-      bio: 'نبذة صغيرة عن المستخدم'
-    };
+    // === تعديل داخل init() — تعيين الملف الشخصي الافتراضي ثم تحميل ما في localStorage =================
+this.profile = {
+  name: 'اسم المستخدم',
+  email: 'user@example.com',
+  bio: 'نبذة صغيرة عن المستخدم',
+  telegramId: '' // حقل جديد لمعرف تليغرام
+};
 
-    this.backBtn.addEventListener('click', ()=> this.goBack());
-    // فتح/إغلاق القائمة المنسدلة عبر زر القائمة
-    this.menuBtn.addEventListener('click', (e)=> {
-      e.stopPropagation();
-      this.toggleMenu();
-    });
+// حاول تحميل الملف الشخصي من التخزين المحلي (إن وُجد)
+this._loadProfile();
 
-    // Telegram WebApp integration (guarded)
-    if (window.Telegram && window.Telegram.WebApp) {
-      this.WebApp = window.Telegram.WebApp;
-      this.WebApp.ready();
-      // hide telegram main button initially
-      this.WebApp.MainButton.hide();
-      this.WebApp.onEvent('mainButtonClicked', ()=> {
-        // handle main button presses globally (contextual)
-        if (this.currentView === 'form') this.submitForm();
-        else if (this.currentView === 'profile') this.saveProfile();
-        else if (this.currentView === 'detail') alert('Main button action on detail');
-      });
-      // back button
-      this.WebApp.BackButton.show();
-      this.WebApp.onEvent('backButtonClicked', ()=> this.goBack());
+// ... بداخل البلوك الذي يتعامل مع Telegram WebApp (بعد this.WebApp.ready();)
+if (window.Telegram && window.Telegram.WebApp) {
+  this.WebApp = window.Telegram.WebApp;
+  this.WebApp.ready();
+  // hide telegram main button initially
+  this.WebApp.MainButton.hide();
+
+  // إذا كان Telegram قد زوّدنا بمعلومات المستخدم، خزن المعرف بشكل دائم
+  const tgUser = (this.WebApp.initDataUnsafe && this.WebApp.initDataUnsafe.user) || null;
+  if (tgUser && tgUser.id) {
+    // لا نُعيد الكتابة إذا كان المعرف محفوظاً مسبقاً في localStorage
+    if (!this.profile.telegramId) {
+      this.profile.telegramId = String(tgUser.id);
+      this._saveProfile();
+    }
+  }
+
+  this.WebApp.onEvent('mainButtonClicked', ()=> {
+    // handle main button presses globally (contextual)
+    if (this.currentView === 'form') this.submitForm();
+    else if (this.currentView === 'profile') this.saveProfile();
+    else if (this.currentView === 'detail') alert('Main button action on detail');
+  });
+  // back button
+  this.WebApp.BackButton.show();
+  this.WebApp.onEvent('backButtonClicked', ()=> this.goBack());
+
     }
 
     // Inject minimal CSS for dropdown (only once)
