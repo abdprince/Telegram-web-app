@@ -1,4 +1,4 @@
-// بسيط: تحكّم في التنقل بين "شاشات" داخل نفس الصفحة
+// بسيط: تحكّم في التنقّل بين "شاشات" داخل نفس الصفحة
 const App = {
   init() {
     this.main = document.getElementById('main');
@@ -10,6 +10,7 @@ const App = {
       list: this.renderList.bind(this),
       detail: this.renderDetail.bind(this),
       form: this.renderForm.bind(this),
+      profile: this.renderProfile.bind(this), // view جديدة للملف الشخصي
     };
 
     this.stack = []; // navigation stack
@@ -18,8 +19,19 @@ const App = {
       {id:2, title:'عنصر ٢', desc:'وصف عنصر ثاني'}
     ];
 
+    // بيانات الملف الشخصي (افتراضية — يمكن تحميلها من API لاحقاً)
+    this.profile = {
+      name: 'اسم المستخدم',
+      email: 'user@example.com',
+      bio: 'نبذة صغيرة عن المستخدم'
+    };
+
     this.backBtn.addEventListener('click', ()=> this.goBack());
-    this.menuBtn.addEventListener('click', ()=> alert('قائمة'));
+    // فتح/إغلاق القائمة المنسدلة عبر زر القائمة
+    this.menuBtn.addEventListener('click', (e)=> {
+      e.stopPropagation();
+      this.toggleMenu();
+    });
 
     // Telegram WebApp integration (guarded)
     if (window.Telegram && window.Telegram.WebApp) {
@@ -30,6 +42,7 @@ const App = {
       this.WebApp.onEvent('mainButtonClicked', ()=> {
         // handle main button presses globally (contextual)
         if (this.currentView === 'form') this.submitForm();
+        else if (this.currentView === 'profile') this.saveProfile();
         else if (this.currentView === 'detail') alert('Main button action on detail');
       });
       // back button
@@ -37,7 +50,131 @@ const App = {
       this.WebApp.onEvent('backButtonClicked', ()=> this.goBack());
     }
 
+    // Inject minimal CSS for dropdown (only once)
+    this._ensureMenuStyles();
+
     this.navigate('welcome');
+  },
+
+  // Inject styles for dropdown menu
+  _ensureMenuStyles(){
+    if (document.getElementById('appMenuStyles')) return;
+    const css = `
+      #appMenu {
+        position: absolute;
+        min-width: 160px;
+        background: #fff;
+        border: 1px solid rgba(0,0,0,0.08);
+        box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+        border-radius: 8px;
+        overflow: hidden;
+        z-index: 9999;
+        transform-origin: top right;
+        transition: opacity .15s ease, transform .15s ease;
+        opacity: 0;
+        pointer-events: none;
+        direction: rtl;
+      }
+      #appMenu.show {
+        opacity: 1;
+        transform: translateY(6px) scale(1);
+        pointer-events: auto;
+      }
+      #appMenu .menu-item {
+        padding: 10px 12px;
+        cursor: pointer;
+        font-size: 14px;
+        color: #111827;
+      }
+      #appMenu .menu-item:hover {
+        background: #f3f4f6;
+      }
+      #appMenu .menu-divider {
+        height: 1px;
+        background: #e5e7eb;
+        margin: 4px 0;
+      }
+      /* أساسيات لعرض صفحة الملف الشخصي */
+      .profile-card .field { display:flex; flex-direction:column; gap:6px; margin-bottom:12px; }
+      .profile-card .field label { font-size:13px; color:#374151; }
+      .profile-card .field input, .profile-card .field textarea { padding:8px 10px; border:1px solid #e5e7eb; border-radius:6px; font-size:14px; }
+      .profile-actions { display:flex; gap:8px; margin-top:8px; }
+    `;
+    const s = document.createElement('style');
+    s.id = 'appMenuStyles';
+    s.appendChild(document.createTextNode(css));
+    document.head.appendChild(s);
+  },
+
+  // Create the dropdown element and global handlers (lazy)
+  createMenu(){
+    if (this.menu) return;
+    const menu = document.createElement('div');
+    menu.id = 'appMenu';
+    menu.innerHTML = `
+      <div class="menu-item" data-action="profile">الملف الشخصي</div>
+      <div class="menu-item" data-action="about">حول</div>
+      <div class="menu-item" data-action="share">مشاركة التطبيق</div>
+      <div class="menu-divider"></div>
+      <div class="menu-item" data-action="logout">تسجيل الخروج</div>
+    `;
+    // click handler for items
+    menu.addEventListener('click', (e)=> {
+      const action = e.target.dataset.action;
+      if (action) {
+        this.handleMenuAction(action);
+      }
+    });
+    document.body.appendChild(menu);
+    // close when clicking outside
+    this._menuDocClick = (e)=> {
+      if (!menu.contains(e.target) && e.target !== this.menuBtn) this.hideMenu();
+    };
+    document.addEventListener('click', this._menuDocClick);
+    // close on escape
+    this._menuKeyDown = (e)=> {
+      if (e.key === 'Escape') this.hideMenu();
+    };
+    document.addEventListener('keydown', this._menuKeyDown);
+    this.menu = menu;
+  },
+
+  // Toggle menu visibility and position it near the menuBtn
+  toggleMenu(){
+    this.createMenu();
+    const menu = this.menu;
+    const btn = this.menuBtn;
+    const rect = btn.getBoundingClientRect();
+    // position top-right of the button (RTL)
+    const top = rect.bottom + window.scrollY + 8;
+    const right = window.innerWidth - rect.right + window.scrollX;
+    menu.style.top = `${top}px`;
+    menu.style.right = `${right}px`;
+    menu.classList.toggle('show');
+  },
+
+  hideMenu(){
+    if (!this.menu) return;
+    this.menu.classList.remove('show');
+  },
+
+  // Handle menu item actions (extend as needed)
+  handleMenuAction(action){
+    this.hideMenu();
+    if (action === 'about') {
+      alert('تطبيق تجريبي لبناء واجهات متوافقة مع Telegram Mini Apps\nالإصدار 1.0');
+    } else if (action === 'share') {
+      if (navigator.share) {
+        navigator.share({title: 'التطبيق التجريبي', text: 'جرب هذا التطبيق التجريبي', url: location.href}).catch(()=>{});
+      } else {
+        alert('مشاركة: ' + location.href);
+      }
+    } else if (action === 'logout') {
+      alert('تم تسجيل الخروج (مثال)');
+    } else if (action === 'profile') {
+      // افتح صفحة الملف الشخصي
+      this.navigate('profile');
+    }
   },
 
   setMainButton(text, visible=true){
@@ -51,12 +188,15 @@ const App = {
       const btn = document.getElementById('localMainBtn');
       if (btn) btn.addEventListener('click', ()=> {
         if (this.currentView === 'form') this.submitForm();
+        else if (this.currentView === 'profile') this.saveProfile();
         else if (this.currentView === 'detail') alert('Local main button action');
       });
     }
   },
 
   navigate(view, params){
+    // hide menu when navigating
+    this.hideMenu();
     this.stack.push({view, params});
     this.currentView = view;
     this.renderCurrent();
@@ -65,6 +205,8 @@ const App = {
   },
 
   goBack(){
+    // hide menu when going back
+    this.hideMenu();
     if (this.stack.length > 1){
       this.stack.pop();
       const top = this.stack[this.stack.length-1];
@@ -171,6 +313,51 @@ const App = {
     // local fallback: no extra handlers here because mainButton triggers submitForm()
   },
 
+  // view الملف الشخصي: عرض وتحرير
+  renderProfile(){
+    const box = document.createElement('div');
+    box.className = 'profile-card';
+    box.innerHTML = `
+      <div class="card" style="flex-direction:column">
+        <div class="field">
+          <label for="profileName">الاسم</label>
+          <input id="profileName" value="${this._escapeHtml(this.profile.name)}" />
+        </div>
+        <div class="field">
+          <label for="profileEmail">البريد الإلكتروني</label>
+          <input id="profileEmail" value="${this._escapeHtml(this.profile.email)}" />
+        </div>
+        <div class="field">
+          <label for="profileBio">نبذة</label>
+          <textarea id="profileBio" rows="4">${this._escapeHtml(this.profile.bio)}</textarea>
+        </div>
+        <div class="profile-actions">
+          <button id="saveProfileBtn" class="btn" style="background:#00a3ff">حفظ</button>
+          <button id="cancelProfileBtn" class="btn">إلغاء</button>
+        </div>
+      </div>
+    `;
+    this.main.appendChild(box);
+
+    document.getElementById('saveProfileBtn').addEventListener('click', ()=> this.saveProfile());
+    document.getElementById('cancelProfileBtn').addEventListener('click', ()=> this.goBack());
+
+    // MainButton should also be a way to save
+    this.setMainButton('حفظ', true);
+  },
+
+  // حفظ بيانات الملف الشخصي
+  saveProfile(){
+    const name = document.getElementById('profileName')?.value?.trim() || this.profile.name;
+    const email = document.getElementById('profileEmail')?.value?.trim() || this.profile.email;
+    const bio = document.getElementById('profileBio')?.value?.trim() || this.profile.bio;
+
+    // هنا يمكنك إضافة تحقق/إرسال إلى API عند الحاجة
+    this.profile = { name, email, bio };
+    alert('تم حفظ بيانات الملف الشخصي');
+    this.goBack();
+  },
+
   submitForm(){
     const title = document.getElementById('title')?.value || `عنصر ${this.items.length+1}`;
     const desc = document.getElementById('desc')?.value || 'وصف';
@@ -182,6 +369,14 @@ const App = {
     // replace top with list
     this.stack = [{view:'list'}];
     this.renderCurrent();
+  },
+
+  // مساعدة بسيطة لتفادي حقن HTML في الحقول
+  _escapeHtml(str){
+    return String(str || '').replace(/[&<>"']/g, s=> {
+      const map = {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'};
+      return map[s] || s;
+    });
   }
 };
 
