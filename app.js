@@ -279,8 +279,6 @@ toggleMenu(){
     this.items.forEach(it=>{
       const card = document.createElement('div');
       card.className = 'card';
-      card.innerHTML = '<h3>New Title</h3><p>Some new content.</p>';
-// The previous content of 'card' is removed and replaced with the new H3 and P elements
       
 
         <div class="detail-image">${it.title.charAt(0)}</div>
