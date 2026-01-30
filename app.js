@@ -279,7 +279,7 @@ toggleMenu(){
     this.items.forEach(it=>{
       const card = document.createElement('div');
       card.className = 'card';
-      
+      card.innerHTML = `
 
         <div class="detail-image">${it.title.charAt(0)}</div>
         <div class="meta">
