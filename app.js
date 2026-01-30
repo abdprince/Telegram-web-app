@@ -57,12 +57,13 @@ const App = {
 
   // Inject styles for dropdown menu
   // (استبدال) Inject styles for dropdown menu
+// (استبدال) Inject styles for dropdown menu
 _ensureMenuStyles(){
   if (document.getElementById('appMenuStyles')) return;
   const css = `
     #appMenu {
       position: fixed; /* fixed so it doesn't affect page layout / width */
-      min-width: 300px;
+      min-width: 160px;
       background: #fff;
       border: 1px solid rgba(0,0,0,0.08);
       box-shadow: 0 6px 18px rgba(0,0,0,0.08);
