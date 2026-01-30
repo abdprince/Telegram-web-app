@@ -18,7 +18,7 @@ const App = {
       {id:2, title:'عنصر ٢', desc:'وصف عنصر ثاني'}
     ];
 
-    // بيانات الملف الشخصي (افتراضية — يمكن تحميلها من API لاحقاً)
+    
     // === تعديل داخل init() — تعيين الملف الشخصي الافتراضي ثم تحميل ما في localStorage =================
 this.profile = {
   name: 'اسم المستخدم',
@@ -357,37 +357,42 @@ toggleMenu(){
     // local fallback: no extra handlers here because mainButton triggers submitForm()
   },
 
-  // view الملف الشخصي: عرض وتحرير
-  renderProfile(){
-    const box = document.createElement('div');
-    box.className = 'profile-card';
-    box.innerHTML = `
-      <div class="card" style="flex-direction:column">
-        <div class="field">
-          <label for="profileName">الاسم</label>
-          <input id="profileName" value="${this._escapeHtml(this.profile.name)}" />
-        </div>
-        <div class="field">
-          <label for="profileEmail">البريد الإلكتروني</label>
-          <input id="profileEmail" value="${this._escapeHtml(this.profile.email)}" />
-        </div>
-        <div class="field">
-          <label for="profileBio">نبذة</label>
-          <textarea id="profileBio" rows="4">${this._escapeHtml(this.profile.bio)}</textarea>
-        </div>
-        <div class="profile-actions">
-          <button id="saveProfileBtn" class="btn" style="background:#00a3ff">حفظ</button>
-          <button id="cancelProfileBtn" class="btn">إلغاء</button>
-        </div>
+  // === تعديل renderProfile() لإظهار معرف تليغرام كحقل قراءة فقط =================
+renderProfile(){
+  const box = document.createElement('div');
+  box.className = 'profile-card';
+  box.innerHTML = `
+    <div class="card" style="flex-direction:column">
+      <div class="field">
+        <label for="profileName">الاسم</label>
+        <input id="profileName" value="${this._escapeHtml(this.profile.name)}" />
       </div>
-    `;
-    this.main.appendChild(box);
+      <div class="field">
+        <label for="profileEmail">البريد الإلكتروني</label>
+        <input id="profileEmail" value="${this._escapeHtml(this.profile.email)}" />
+      </div>
+      <div class="field">
+        <label for="profileBio">نبذة</label>
+        <textarea id="profileBio" rows="4">${this._escapeHtml(this.profile.bio)}</textarea>
+      </div>
+      <div class="field">
+        <label for="profileTelegramId">معرّف تلغرام</label>
+        <input id="profileTelegramId" value="${this._escapeHtml(this.profile.telegramId || '')}" disabled />
+      </div>
+      <div class="profile-actions">
+        <button id="saveProfileBtn" class="btn" style="background:#00a3ff">حفظ</button>
+        <button id="cancelProfileBtn" class="btn">إلغاء</button>
+      </div>
+    </div>
+  `;
+  this.main.appendChild(box);
 
-    document.getElementById('saveProfileBtn').addEventListener('click', ()=> this.saveProfile());
-    document.getElementById('cancelProfileBtn').addEventListener('click', ()=> this.goBack());
+  document.getElementById('saveProfileBtn').addEventListener('click', ()=> this.saveProfile());
+  document.getElementById('cancelProfileBtn').addEventListener('click', ()=> this.goBack());
 
-    // MainButton should also be a way to save
-    this.setMainButton('حفظ', true);
+  // MainButton should also be a way to save
+  this.setMainButton('حفظ', true);
+
   },
 
   // حفظ بيانات الملف الشخصي
