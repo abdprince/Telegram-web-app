@@ -141,18 +141,51 @@ _ensureMenuStyles(){
   },
 
   // Toggle menu visibility and position it near the menuBtn
-  toggleMenu(){
-    this.createMenu();
-    const menu = this.menu;
-    const btn = this.menuBtn;
-    const rect = btn.getBoundingClientRect();
-    // position top-right of the button (RTL)
-    const top = rect.bottom + window.scrollY + 8;
-    const right = window.innerWidth - rect.right + window.scrollX;
-    menu.style.top = `${top}px`;
-    menu.style.right = `${right}px`;
-    menu.classList.toggle('show');
-  },
+// (استبدال) Toggle menu visibility and smartly position it near the menuBtn
+toggleMenu(){
+  this.createMenu();
+  const menu = this.menu;
+  const btn = this.menuBtn;
+  const rect = btn.getBoundingClientRect();
+  const top = rect.bottom + window.scrollY + 8;
+
+  // if already visible -> hide
+  if (menu.classList.contains('show')) {
+    this.hideMenu();
+    return;
+  }
+
+  // temporarily add show + hidden visibility to measure width without flashing
+  menu.style.visibility = 'hidden';
+  menu.classList.add('show');
+  const mw = menu.offsetWidth || 160; // fallback width
+  menu.style.visibility = '';
+
+  // try to align the menu's RIGHT edge with the button's RIGHT edge (so menu appears to the right)
+  let left = rect.right + window.scrollX - mw;
+
+  // keep it inside viewport with small margin
+  const margin = 8;
+  if (left < margin) {
+    // if not enough space on left side, try aligning left edge to button's left
+    left = rect.left + window.scrollX;
+    // set transform origin accordingly
+    menu.style.transformOrigin = 'top left';
+  } else {
+    menu.style.transformOrigin = 'top right';
+  }
+
+  if (left + mw > window.innerWidth - margin) {
+    left = window.innerWidth - mw - margin;
+  }
+
+  menu.style.left = `${Math.max(left, margin)}px`;
+  menu.style.top = `${top}px`;
+  menu.style.right = 'auto';
+
+  // finally show (class already added above)
+  // note: pointer-events and opacity handled by .show class
+},
 
   hideMenu(){
     if (!this.menu) return;
