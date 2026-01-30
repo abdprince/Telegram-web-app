@@ -18,45 +18,35 @@ const App = {
       {id:2, title:'عنصر ٢', desc:'وصف عنصر ثاني'}
     ];
 
-    
-    // === تعديل داخل init() — تعيين الملف الشخصي الافتراضي ثم تحميل ما في localStorage =================
-this.profile = {
-  name: 'اسم المستخدم',
-  email: 'user@example.com',
-  bio: 'نبذة صغيرة عن المستخدم',
-  telegramId: '' // حقل جديد لمعرف تليغرام
-};
+    // بيانات الملف الشخصي (افتراضية — يمكن تحميلها من API لاحقاً)
+    this.profile = {
+      name: 'اسم المستخدم',
+      email: 'user@example.com',
+      bio: 'نبذة صغيرة عن المستخدم'
+    };
 
-// حاول تحميل الملف الشخصي من التخزين المحلي (إن وُجد)
-this._loadProfile();
+    this.backBtn.addEventListener('click', ()=> this.goBack());
+    // فتح/إغلاق القائمة المنسدلة عبر زر القائمة
+    this.menuBtn.addEventListener('click', (e)=> {
+      e.stopPropagation();
+      this.toggleMenu();
+    });
 
-// ... بداخل البلوك الذي يتعامل مع Telegram WebApp (بعد this.WebApp.ready();)
-if (window.Telegram && window.Telegram.WebApp) {
-  this.WebApp = window.Telegram.WebApp;
-  this.WebApp.ready();
-  // hide telegram main button initially
-  this.WebApp.MainButton.hide();
-
-  // إذا كان Telegram قد زوّدنا بمعلومات المستخدم، خزن المعرف بشكل دائم
-  const tgUser = (this.WebApp.initDataUnsafe && this.WebApp.initDataUnsafe.user) || null;
-  if (tgUser && tgUser.id) {
-    // لا نُعيد الكتابة إذا كان المعرف محفوظاً مسبقاً في localStorage
-    if (!this.profile.telegramId) {
-      this.profile.telegramId = String(tgUser.id);
-      this._saveProfile();
-    }
-  }
-
-  this.WebApp.onEvent('mainButtonClicked', ()=> {
-    // handle main button presses globally (contextual)
-    if (this.currentView === 'form') this.submitForm();
-    else if (this.currentView === 'profile') this.saveProfile();
-    else if (this.currentView === 'detail') alert('Main button action on detail');
-  });
-  // back button
-  this.WebApp.BackButton.show();
-  this.WebApp.onEvent('backButtonClicked', ()=> this.goBack());
-}
+    // Telegram WebApp integration (guarded)
+    if (window.Telegram && window.Telegram.WebApp) {
+      this.WebApp = window.Telegram.WebApp;
+      this.WebApp.ready();
+      // hide telegram main button initially
+      this.WebApp.MainButton.hide();
+      this.WebApp.onEvent('mainButtonClicked', ()=> {
+        // handle main button presses globally (contextual)
+        if (this.currentView === 'form') this.submitForm();
+        else if (this.currentView === 'profile') this.saveProfile();
+        else if (this.currentView === 'detail') alert('Main button action on detail');
+      });
+      // back button
+      this.WebApp.BackButton.show();
+      this.WebApp.onEvent('backButtonClicked', ()=> this.goBack());
     }
 
     // Inject minimal CSS for dropdown (only once)
@@ -357,59 +347,50 @@ toggleMenu(){
     // local fallback: no extra handlers here because mainButton triggers submitForm()
   },
 
-  // === تعديل renderProfile() لإظهار معرف تليغرام كحقل قراءة فقط =================
-renderProfile(){
-  const box = document.createElement('div');
-  box.className = 'profile-card';
-  box.innerHTML = `
-    <div class="card" style="flex-direction:column">
-      <div class="field">
-        <label for="profileName">الاسم</label>
-        <input id="profileName" value="${this._escapeHtml(this.profile.name)}" />
+  // view الملف الشخصي: عرض وتحرير
+  renderProfile(){
+    const box = document.createElement('div');
+    box.className = 'profile-card';
+    box.innerHTML = `
+      <div class="card" style="flex-direction:column">
+        <div class="field">
+          <label for="profileName">الاسم</label>
+          <input id="profileName" value="${this._escapeHtml(this.profile.name)}" />
+        </div>
+        <div class="field">
+          <label for="profileEmail">البريد الإلكتروني</label>
+          <input id="profileEmail" value="${this._escapeHtml(this.profile.email)}" />
+        </div>
+        <div class="field">
+          <label for="profileBio">نبذة</label>
+          <textarea id="profileBio" rows="4">${this._escapeHtml(this.profile.bio)}</textarea>
+        </div>
+        <div class="profile-actions">
+          <button id="saveProfileBtn" class="btn" style="background:#00a3ff">حفظ</button>
+          <button id="cancelProfileBtn" class="btn">إلغاء</button>
+        </div>
       </div>
-      <div class="field">
-        <label for="profileEmail">البريد الإلكتروني</label>
-        <input id="profileEmail" value="${this._escapeHtml(this.profile.email)}" />
-      </div>
-      <div class="field">
-        <label for="profileBio">نبذة</label>
-        <textarea id="profileBio" rows="4">${this._escapeHtml(this.profile.bio)}</textarea>
-      </div>
-      <div class="field">
-        <label for="profileTelegramId">معرّف تلغرام</label>
-        <input id="profileTelegramId" value="${this._escapeHtml(this.profile.telegramId || '')}" disabled />
-      </div>
-      <div class="profile-actions">
-        <button id="saveProfileBtn" class="btn" style="background:#00a3ff">حفظ</button>
-        <button id="cancelProfileBtn" class="btn">إلغاء</button>
-      </div>
-    </div>
-  `;
-  this.main.appendChild(box);
+    `;
+    this.main.appendChild(box);
 
-  document.getElementById('saveProfileBtn').addEventListener('click', ()=> this.saveProfile());
-  document.getElementById('cancelProfileBtn').addEventListener('click', ()=> this.goBack());
+    document.getElementById('saveProfileBtn').addEventListener('click', ()=> this.saveProfile());
+    document.getElementById('cancelProfileBtn').addEventListener('click', ()=> this.goBack());
 
-  // MainButton should also be a way to save
-  this.setMainButton('حفظ', true);
-
+    // MainButton should also be a way to save
+    this.setMainButton('حفظ', true);
   },
 
-  // === تعديل saveProfile() لحفظ الملف محلياً =================
-saveProfile(){
-  const name = document.getElementById('profileName')?.value?.trim() || this.profile.name;
-  const email = document.getElementById('profileEmail')?.value?.trim() || this.profile.email;
-  const bio = document.getElementById('profileBio')?.value?.trim() || this.profile.bio;
+  // حفظ بيانات الملف الشخصي
+  saveProfile(){
+    const name = document.getElementById('profileName')?.value?.trim() || this.profile.name;
+    const email = document.getElementById('profileEmail')?.value?.trim() || this.profile.email;
+    const bio = document.getElementById('profileBio')?.value?.trim() || this.profile.bio;
 
-  // احتفظ بمعرّف التليغرام كما هو (لا نسمح للمستخدم بتعديله هنا)
-  this.profile = { name, email, bio, telegramId: this.profile.telegramId || '' };
-
-  // حفظ محلي
-  this._saveProfile();
-
-  alert('تم حفظ بيانات الملف الشخصي');
-  this.goBack();
-},
+    // هنا يمكنك إضافة تحقق/إرسال إلى API عند الحاجة
+    this.profile = { name, email, bio };
+    alert('تم حفظ بيانات الملف الشخصي');
+    this.goBack();
+  },
 
   submitForm(){
     const title = document.getElementById('title')?.value || `عنصر ${this.items.length+1}`;
