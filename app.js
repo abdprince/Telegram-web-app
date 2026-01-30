@@ -259,7 +259,7 @@ toggleMenu(){
     const el = document.createElement('div');
     el.innerHTML = `
       <div class="center" style="flex-direction:column;gap:16px;padding-top:24px">
-        <div style="width:92px;height:92px;border-radius:18px;background:linear-gradient(90deg,#0088cc,#0077b6);display:flex;align-items:center;justify-content:center;color:#fff;font-size:28px">ت</div>
+        <div style="width:92px;height:92px;border-radius:18px;background:linear-gradient(90deg,#0088cc,#0077b6);display:flex;align-items:center;justify-content:center;color:#fff;font-size:28px">ت</di[...]
         <h2 style="margin:0">أهلاً بك في التطبيق</h2>
         <p class="small" style="max-width:320px;text-align:center;color:#6b7280">تطبيق تجريبي لبناء واجهات متوافقة مع Telegram Mini Apps</p>
         <div style="height:8px"></div>
@@ -288,11 +288,6 @@ toggleMenu(){
       `;
       container.appendChild(card);
     });
-    // add create new card
-    const addCard = document.createElement('div');
-    addCard.className = 'card';
-    addCard.innerHTML = `<div style="flex:1"><p class="h">إضافة جديد</p><p class="small">إنشاء عنصر جديد بسرعة</p></div><div><button class="btn" id="addNew">+</button></div>`;
-    container.appendChild(addCard);
 
     this.main.appendChild(container);
     container.querySelectorAll('.card .btn[data-id]').forEach(b=>{
@@ -302,7 +297,6 @@ toggleMenu(){
         this.navigate('detail', {item: it});
       });
     });
-    document.getElementById('addNew').addEventListener('click', ()=> this.navigate('form'));
 
     this.setMainButton('', false);
   },
