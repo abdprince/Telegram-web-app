@@ -1,4 +1,3 @@
-// بسيط: تحكّم في التنقّل بين "شاشات" داخل نفس الصفحة
 const App = {
   init() {
     this.main = document.getElementById('main');
@@ -140,51 +139,19 @@ _ensureMenuStyles(){
     this.menu = menu;
   },
 
-// (استبدال) Toggle menu visibility and smartly position it near the menuBtn
-toggleMenu(){
-  this.createMenu();
-  const menu = this.menu;
-  const btn = this.menuBtn;
-  const rect = btn.getBoundingClientRect();
-  const top = rect.bottom + window.scrollY + 8;
-
-  // if already visible -> hide
-  if (menu.classList.contains('show')) {
-    this.hideMenu();
-    return;
-  }
-
-  // temporarily add show + hidden visibility to measure width without flashing
-  menu.style.visibility = 'hidden';
-  menu.classList.add('show');
-  const mw = menu.offsetWidth || 160; // fallback width
-  menu.style.visibility = '';
-
-  // try to align the menu's RIGHT edge with the button's RIGHT edge (so menu appears to the right)
-  let left = rect.right + window.scrollX - mw;
-
-  // keep it inside viewport with small margin
-  const margin = 8;
-  if (left < margin) {
-    // if not enough space on left side, try aligning left edge to button's left
-    left = rect.left + window.scrollX;
-    // set transform origin accordingly
-    menu.style.transformOrigin = 'top left';
-  } else {
-    menu.style.transformOrigin = 'top right';
-  }
-
-  if (left + mw > window.innerWidth - margin) {
-    left = window.innerWidth - mw - margin;
-  }
-
-  menu.style.left = `${Math.max(left, margin)}px`;
-  menu.style.top = `${top}px`;
-  menu.style.right = 'auto';
-
-  // finally show (class already added above)
-  // note: pointer-events and opacity handled by .show class
-},
+  // Toggle menu visibility and position it near the menuBtn
+  toggleMenu(){
+    this.createMenu();
+    const menu = this.menu;
+    const btn = this.menuBtn;
+    const rect = btn.getBoundingClientRect();
+    // position top-right of the button (RTL)
+    const top = rect.bottom + window.scrollY + 8;
+    const right = window.innerWidth - rect.right + window.scrollX;
+    menu.style.top = `${top}px`;
+    menu.style.right = `${right}px`;
+    menu.classList.toggle('show');
+  },
 
   hideMenu(){
     if (!this.menu) return;
@@ -259,7 +226,7 @@ toggleMenu(){
     const el = document.createElement('div');
     el.innerHTML = `
       <div class="center" style="flex-direction:column;gap:16px;padding-top:24px">
-        <div style="width:92px;height:92px;border-radius:18px;background:linear-gradient(90deg,#0088cc,#0077b6);display:flex;align-items:center;justify-content:center;color:#fff;font-size:28px">ت</di[...]
+        <div style="width:92px;height:92px;border-radius:18px;background:linear-gradient(90deg,#0088cc,#0077b6);display:flex;align-items:center;justify-content:center;color:#fff;font-size:28px">ت</div>
         <h2 style="margin:0">أهلاً بك في التطبيق</h2>
         <p class="small" style="max-width:320px;text-align:center;color:#6b7280">تطبيق تجريبي لبناء واجهات متوافقة مع Telegram Mini Apps</p>
         <div style="height:8px"></div>
@@ -288,6 +255,11 @@ toggleMenu(){
       `;
       container.appendChild(card);
     });
+    // add create new card
+    const addCard = document.createElement('div');
+    addCard.className = 'card';
+    addCard.innerHTML = `<div style="flex:1"><p class="h">إضافة جديد</p><p class="small">إنشاء عنصر جديد بسرعة</p></div><div><button class="btn" id="addNew">+</button></div>`;
+    container.appendChild(addCard);
 
     this.main.appendChild(container);
     container.querySelectorAll('.card .btn[data-id]').forEach(b=>{
@@ -297,6 +269,7 @@ toggleMenu(){
         this.navigate('detail', {item: it});
       });
     });
+    document.getElementById('addNew').addEventListener('click', ()=> this.navigate('form'));
 
     this.setMainButton('', false);
   },
