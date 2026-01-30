@@ -395,17 +395,21 @@ renderProfile(){
 
   },
 
-  // حفظ بيانات الملف الشخصي
-  saveProfile(){
-    const name = document.getElementById('profileName')?.value?.trim() || this.profile.name;
-    const email = document.getElementById('profileEmail')?.value?.trim() || this.profile.email;
-    const bio = document.getElementById('profileBio')?.value?.trim() || this.profile.bio;
+  // === تعديل saveProfile() لحفظ الملف محلياً =================
+saveProfile(){
+  const name = document.getElementById('profileName')?.value?.trim() || this.profile.name;
+  const email = document.getElementById('profileEmail')?.value?.trim() || this.profile.email;
+  const bio = document.getElementById('profileBio')?.value?.trim() || this.profile.bio;
 
-    // هنا يمكنك إضافة تحقق/إرسال إلى API عند الحاجة
-    this.profile = { name, email, bio };
-    alert('تم حفظ بيانات الملف الشخصي');
-    this.goBack();
-  },
+  // احتفظ بمعرّف التليغرام كما هو (لا نسمح للمستخدم بتعديله هنا)
+  this.profile = { name, email, bio, telegramId: this.profile.telegramId || '' };
+
+  // حفظ محلي
+  this._saveProfile();
+
+  alert('تم حفظ بيانات الملف الشخصي');
+  this.goBack();
+},
 
   submitForm(){
     const title = document.getElementById('title')?.value || `عنصر ${this.items.length+1}`;
