@@ -292,7 +292,6 @@ toggleMenu(){
     // add create new card
     const addCard = document.createElement('div');
     addCard.className = 'card';
-    addCard.innerHTML = `<div style="flex:1"><p class="h">إضافة جديد</p><p class="small">إنشاء عنصر جديد بسرعة</p></div><div><button class="btn" id="addNew">+</button></div>`;
     container.appendChild(addCard);
 
     this.main.appendChild(container);
