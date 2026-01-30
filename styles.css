@@ -1,0 +1,75 @@
+:root{
+  --bg: #f6f8fa;
+  --card: #ffffff;
+  --primary: #0088cc;
+  --accent: #0077b6;
+  --text: #111827;
+  --muted: #6b7280;
+  --radius: 10px;
+  font-family: 'Tajawal', sans-serif;
+}
+*{box-sizing:border-box}
+html,body,#app{height:100%}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  direction:rtl;
+}
+.topbar{
+  height:56px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 12px;
+  background:linear-gradient(0deg, rgba(255,255,255,0.6), rgba(255,255,255,0));
+  border-bottom:1px solid rgba(0,0,0,0.05);
+}
+.title{font-size:18px; margin:0; font-weight:700}
+.icon-btn{
+  background:none;
+  border:0;
+  font-size:20px;
+  padding:8px;
+  cursor:pointer;
+}
+.icon-btn.hidden{visibility:hidden}
+.main{
+  padding:12px;
+  overflow:auto;
+  height: calc(100% - 56px);
+}
+/* cards list */
+.card{
+  background:var(--card);
+  border-radius:var(--radius);
+  padding:12px;
+  margin-bottom:12px;
+  box-shadow:0 1px 4px rgba(15,23,42,0.06);
+  display:flex;
+  gap:12px;
+  align-items:center;
+}
+.card .meta{flex:1}
+.h{font-size:16px; margin:0 0 6px 0; font-weight:600}
+.s{font-size:13px; color:var(--muted); margin:0}
+
+/* detail */
+.detail-image{
+  width:84px; height:84px; border-radius:10px; background:linear-gradient(90deg,var(--primary),var(--accent));
+  display:flex; align-items:center; justify-content:center; color:white; font-weight:700; font-size:22px;
+  flex-shrink:0;
+}
+
+/* form */
+.input{width:100%; padding:10px 12px; border-radius:8px; border:1px solid #e6e9ee; font-size:14px; margin-bottom:10px}
+.btn{
+  display:inline-block; padding:12px 18px; background:var(--primary); color:white; border-radius:10px; border:0; cursor:pointer; font-weight:700;
+}
+.local-footer{height:72px; /* reserve space for Telegram MainButton visual */}
+
+/* small helpers */
+.center{display:flex;align-items:center;justify-content:center}
+.small{font-size:12px;color:var(--muted)}
