@@ -56,8 +56,6 @@ const App = {
   },
 
   // Inject styles for dropdown menu
-  // (استبدال) Inject styles for dropdown menu
-// (استبدال) Inject styles for dropdown menu
 _ensureMenuStyles(){
   if (document.getElementById('appMenuStyles')) return;
   const css = `
@@ -141,7 +139,6 @@ _ensureMenuStyles(){
   },
 
   // Toggle menu visibility and position it near the menuBtn
-// (استبدال) Toggle menu visibility and smartly position it near the menuBtn
 toggleMenu(){
   this.createMenu();
   const menu = this.menu;
